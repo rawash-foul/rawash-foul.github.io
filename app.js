@@ -65,7 +65,6 @@
     var t = el('a', '', 'اتصل ' + hotline); t.href = 'tel:' + hotline; r.appendChild(t);
     var m = el('a', '', 'الفروع على الخريطة'); m.href = data.maps; m.target = '_blank'; m.rel = 'noopener'; r.appendChild(m);
     b.appendChild(r);
-    if (data.talabat) { var tl = el('div', 'brow'); var ta = el('a', '', 'اطلب من طلبات'); ta.href = data.talabat; ta.target = '_blank'; ta.rel = 'noopener'; tl.appendChild(ta); b.appendChild(tl); }
     $('note').textContent = 'الأسعار دي لفروع السويس والملاحة الجديدة والسلام بس. فرع مدينتي ليه منيو وأسعار مختلفة مش موجودة هنا. أسعار الأطباق والسندوتشات من المنيو المطبوع في نوفمبر ٢٠٢٦، وأقسام علب الفول وأقراص الطعمية والطاسات والحلو والمشروبات لسه بأسعار منيو أبريل ٢٠٢٦.';
     spy();
   }
@@ -96,7 +95,7 @@
   function ready() { var s = totals(); if (!s.n) return false; if (mode === 'توصيل' && !$('address').value.trim()) return false; return true; }
   function orderText(lines, t) {
     var body = lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : '') + ' = ' + (l.qty * l.price) + ' ج'; }).join('\n');
-    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي' ? 'دفع إنستاباي (هبعت الإيصال)' : pay) + '\n\n' + body + '\n\nالإجمالي: ' + t + ' ج (بدون التوصيل)';
+    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي أو محفظة' ? 'دفع إنستاباي أو محفظة (هبعت الإيصال)' : pay) + '\n\n' + body + '\n\nالإجمالي: ' + t + ' ج (بدون التوصيل)';
     if ($('name').value.trim()) x += '\nالاسم: ' + $('name').value.trim();
     if ($('phone').value.trim()) x += '\nالموبايل: ' + $('phone').value.trim();
     if (mode === 'توصيل') x += '\nالعنوان: ' + $('address').value.trim();
@@ -146,7 +145,7 @@
   $('clear').onclick = function () { cart = {}; store(KEY, cart); refresh(); };
   ['branch', 'name', 'phone', 'address', 'notes'].forEach(function (id) { $(id).addEventListener('input', function () { buildLink(); saveProf(); }); $(id).addEventListener('change', function () { buildLink(); saveProf(); }); });
   Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (b) { b.onclick = function () { mode = b.dataset.m; Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (x) { x.classList.toggle('on', x === b); }); saveProf(); buildLink(); }; });
-  Array.prototype.forEach.call(document.querySelectorAll('#payseg button'), function (b) { b.onclick = function () { pay = b.dataset.p; Array.prototype.forEach.call(document.querySelectorAll('#payseg button'), function (x) { x.classList.toggle('on', x === b); }); $('payinfo').hidden = pay !== 'إنستاباي'; buildLink(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#payseg button'), function (b) { b.onclick = function () { pay = b.dataset.p; Array.prototype.forEach.call(document.querySelectorAll('#payseg button'), function (x) { x.classList.toggle('on', x === b); }); $('payinfo').hidden = pay !== 'إنستاباي أو محفظة'; buildLink(); }; });
   $('paycopy').onclick = function () { var n = '01001844656'; function ok() { toast('اتنسخ الرقم'); } if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(n).then(ok, function () { toast(n); }); else { var t = document.createElement('textarea'); t.value = n; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast(n); } t.remove(); } };
   $('send').addEventListener('click', function (e) { if (!ready()) { e.preventDefault(); toast('اكتب العنوان الأول'); $('address').focus(); return; } onSent(); });
   if (ENDPOINT) $('consent-w').hidden = false;
