@@ -32,9 +32,9 @@
       <a class="btn alt" id="hero-call" href="#">اتصل بينا</a>
     </div>
     <button type="button" class="reorder" id="reorder" hidden></button>
+    <button type="button" class="getapp" id="getapp" hidden>حمّل التطبيق على موبايلك</button>
   </div>
 </header>
-<div class="ios" id="ios" hidden>على الآيفون: من سفاري دوس مشاركة ثم "إضافة إلى الشاشة الرئيسية" <button type="button" id="ios-x" aria-label="إغلاق">×</button></div>
 <div class="sticky">
   <div class="search"><input id="q" type="search" placeholder="دوّر على صنف... (فول، طعمية، بطاطس)" aria-label="بحث في المنيو" enterkeyhint="search"></div>
   <nav id="cats" class="cats" aria-label="أقسام المنيو"></nav>
@@ -42,10 +42,35 @@
 <p class="note" id="note"></p>
 <main id="menu"></main>
 <p class="empty" id="empty" hidden>مفيش صنف بالاسم ده. جرّب كلمة تانية أو كلمنا واتساب.</p>
+<section class="feedback" id="feedback">
+  <h2>رأيك يهمنا</h2>
+  <p class="muted">قولنا رأيك في الأكل أو الخدمة. هيوصل لصاحب المطعم على واتساب مباشرة.</p>
+  <div class="stars" id="stars" role="radiogroup" aria-label="التقييم"></div>
+  <label class="field">اسمك (اختياري)<input id="fb-name" type="text" autocomplete="name"></label>
+  <label class="field">تعليقك<textarea id="fb-text" rows="3" placeholder="اكتب رأيك هنا"></textarea></label>
+  <a class="send" id="fb-send" href="#" target="_blank" rel="noopener">ابعت رأيك على واتساب</a>
+</section>
 <section class="branches" id="branches"></section>
 <footer class="foot">فول محمود رواش · أصل الحكاية من سنة ١٩١٤</footer>
 <div id="spacer"></div>
 <button type="button" id="top" class="totop" hidden aria-label="لأعلى">↑</button>
+<div class="guide" id="guide" hidden role="dialog" aria-label="تثبيت التطبيق">
+  <div class="guide-in">
+    <div class="grab"></div>
+    <div class="sheet-head"><h2>حمّل تطبيق رواش</h2><button type="button" id="guide-x" aria-label="إغلاق">×</button></div>
+    <p class="muted" id="guide-web" hidden>انت فاتح الصفحة من جوه تطبيق تاني (واتساب أو فيسبوك). دوس على النقط الثلاثة واختار "فتح في المتصفح" الأول، وبعدين كمّل الخطوات.</p>
+    <button type="button" class="send" id="guide-install" hidden>ثبّت التطبيق دلوقتي</button>
+    <div class="os" id="os-android">
+      <h3>أندرويد (كروم)</h3>
+      <ol><li>دوس على النقط الثلاثة ⋮ فوق على اليمين.</li><li>اختار "تثبيت التطبيق" أو "إضافة إلى الشاشة الرئيسية".</li><li>دوس "تثبيت". هتلاقي أيقونة رواش على الشاشة.</li></ol>
+    </div>
+    <div class="os" id="os-ios">
+      <h3>آيفون (سفاري)</h3>
+      <ol><li>افتح الصفحة في سفاري (مش كروم).</li><li>دوس على زر المشاركة تحت.</li><li>اختار "إضافة إلى الشاشة الرئيسية" ثم "إضافة".</li></ol>
+    </div>
+    <p class="muted">من غير تحميل من المتجر ومن غير مصاريف. التطبيق بيفتح بملء الشاشة زي أي تطبيق.</p>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <footer class="cartbar" id="cartbar" hidden>
   <button type="button" id="open-cart"><span class="badge" id="cart-count"></span><span>شوف الطلب</span><span id="cart-total"></span></button>

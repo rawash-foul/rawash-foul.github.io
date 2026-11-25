@@ -86,3 +86,18 @@ section.cat h2:before{content:"";width:5px;height:22px;border-radius:3px;backgro
 @media(min-width:760px){body{max-width:640px;margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,.08)}.cartbar{max-width:640px;margin:auto}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 .sheet-inner{max-width:640px;margin:0 auto}
+
+.getapp{margin-top:12px;width:100%;min-height:48px;border-radius:14px;border:1px solid var(--gold2);background:var(--gold);color:#fff;font-weight:800;font-size:16px}
+.feedback{margin:18px 14px 0;padding:6px 16px 16px;background:var(--card);border:1px solid var(--line);border-radius:18px}
+.feedback h2{font-size:22px;margin:14px 0 4px}
+.stars{display:flex;gap:6px;direction:ltr;justify-content:center;margin:10px 0}
+.stars button{border:0;background:none;font-size:34px;line-height:1;min-width:48px;min-height:48px;color:#d8c9b0;transition:transform .1s}
+.stars button.on{color:var(--gold2)}.stars button:active{transform:scale(.9)}
+.guide{position:fixed;inset:0;background:rgba(20,10,8,.55);z-index:11;display:flex;align-items:flex-end}
+.guide-in{background:var(--cream);width:100%;max-width:640px;margin:0 auto;max-height:90vh;overflow:auto;border-radius:22px 22px 0 0;padding:8px 18px calc(18px + env(safe-area-inset-bottom));animation:up .25s}
+.guide h3{margin:14px 0 4px;font-size:17px}.guide ol{margin:0;padding-inline-start:22px;line-height:2}
+.guide-in .sheet-head button{font-size:28px;border:0;background:none;min-width:44px;min-height:44px}
+.installbar{background:var(--brand);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:14px}
+.installbar button{border:0;border-radius:12px;min-height:40px;padding:0 14px;font-weight:800}
+.installbar .go{background:var(--gold);color:#fff;margin-inline-start:auto}
+.installbar .x{background:none;color:#fff;font-size:22px;min-width:36px;padding:0}

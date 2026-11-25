@@ -149,14 +149,42 @@
   var deferred, standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; $('install').hidden = false; });
   $('install').onclick = function () { if (deferred) { deferred.prompt(); deferred = null; $('install').hidden = true; } };
-  window.addEventListener('appinstalled', function () { $('install').hidden = true; });
-  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone && !load('rawash.ios', false)) $('ios').hidden = false;
-  $('ios-x').onclick = function () { $('ios').hidden = true; store('rawash.ios', true); };
+  window.addEventListener('appinstalled', function () { $('install').hidden = true; $('getapp').hidden = true; });
   if (navigator.share) { $('share').hidden = false; $('share').onclick = function () { navigator.share({ title: 'فول محمود رواش', text: 'منيو فول محمود رواش واطلب على واتساب', url: location.href.split('#')[0] }).catch(function () {}); }; }
 
   ['name', 'phone', 'address'].forEach(function (id) { if (prof[id]) $(id).value = prof[id]; });
   if (prof.branch) $('branch').value = prof.branch;
   Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (x) { x.classList.toggle('on', x.dataset.m === mode); });
+
+
+  /* install guide */
+  var ua = navigator.userAgent, isIOS = /iphone|ipad|ipod/i.test(ua), isAnd = /android/i.test(ua), inApp = /FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua);
+  function showGuide() {
+    $('os-ios').hidden = !isIOS && isAnd; $('os-android').hidden = isIOS;
+    $('guide-web').hidden = !inApp; $('guide-install').hidden = !deferred;
+    $('guide').hidden = false;
+  }
+  if (!standalone) {
+    $('getapp').hidden = false; $('getapp').onclick = showGuide;
+    if (!load('rawash.bar', false)) {
+      var bar = el('div', 'installbar'); bar.appendChild(el('span', '', 'ثبّت رواش كتطبيق على موبايلك'));
+      var go = el('button', 'go', 'إزاي؟'); go.type = 'button'; go.onclick = showGuide; bar.appendChild(go);
+      var x = el('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'إغلاق'); x.onclick = function () { bar.remove(); store('rawash.bar', true); }; bar.appendChild(x);
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+  }
+  $('guide-x').onclick = function () { $('guide').hidden = true; };
+  $('guide').onclick = function (e) { if (e.target === $('guide')) $('guide').hidden = true; };
+  $('guide-install').onclick = function () { if (deferred) { deferred.prompt(); deferred = null; } $('guide').hidden = true; };
+
+  /* feedback to WhatsApp */
+  var rating = 0, sb = $('stars');
+  for (var i = 1; i <= 5; i++) (function (n) { var b = el('button', '', '★'); b.type = 'button'; b.setAttribute('aria-label', n + ' من ٥'); b.onclick = function () { rating = n; Array.prototype.forEach.call(sb.children, function (x, j) { x.classList.toggle('on', j < n); }); fb(); }; sb.appendChild(b); })(i);
+  function fb() {
+    var t = $('fb-text').value.trim(), msg = 'رأي في فول محمود رواش\n' + (rating ? 'التقييم: ' + rating + ' من ٥\n' : '') + (t ? 'التعليق: ' + t + '\n' : '') + ($('fb-name').value.trim() ? 'الاسم: ' + $('fb-name').value.trim() : '');
+    var a = $('fb-send'); a.href = 'https://wa.me/2' + (hotline || '01280855559') + '?text=' + encodeURIComponent(msg); a.classList.toggle('dis', !rating && !t);
+  }
+  ['fb-text', 'fb-name'].forEach(function (id) { $(id).addEventListener('input', fb); }); fb();
 
   fetch('menu.json').then(function (r) { return r.json(); }).then(function (d) {
     data = d; hotline = d.hotline;
