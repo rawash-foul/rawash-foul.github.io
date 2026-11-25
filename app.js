@@ -9,7 +9,7 @@
   var cart = load(KEY, {}), prof = load(PKEY, { mode: 'توصيل' }), last = load(LKEY, null);
   var ENDPOINT = '', TOKEN = '';
   var pay = 'كاش عند الاستلام';
-  var data, hotline, steppers = [], mode = prof.mode || 'توصيل';
+  var geo = null, data, hotline, steppers = [], mode = prof.mode || 'توصيل';
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   var toastT;
@@ -104,6 +104,7 @@
     if ($('name').value.trim()) x += '\nالاسم: ' + $('name').value.trim();
     if ($('phone').value.trim()) x += '\nالموبايل: ' + $('phone').value.trim();
     if (mode === 'توصيل') x += '\nالعنوان: ' + $('address').value.trim();
+    if (geo && mode === 'توصيل') x += '\nموقعي على الخريطة: https://www.google.com/maps?q=' + geo.lat.toFixed(5) + ',' + geo.lon.toFixed(5);
     if ($('notes').value.trim()) x += '\nملاحظات: ' + $('notes').value.trim();
     return x;
   }
@@ -118,7 +119,7 @@
   function sendToSheet(s) {
     if (!ENDPOINT || !$('consent').checked) return;
     var items = s.lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : ''); }).join('\n');
-    try { fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ t: TOKEN, consent: true, name: $('name').value, phone: $('phone').value, branch: $('branch').value, mode: mode + ' / ' + pay, address: mode === 'توصيل' ? $('address').value : '', items: items, total: s.t, notes: $('notes').value }), keepalive: true }); } catch (e) {}
+    try { fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ t: TOKEN, consent: true, name: $('name').value, phone: $('phone').value, branch: $('branch').value, mode: mode + ' / ' + pay, address: mode === 'توصيل' ? $('address').value + (geo ? ' | https://www.google.com/maps?q=' + geo.lat.toFixed(5) + ',' + geo.lon.toFixed(5) : '') : '', items: items, total: s.t, notes: $('notes').value }), keepalive: true }); } catch (e) {}
   }
   function onSent() { var s = totals(); if (!s.n) return; sendToSheet(s); last = { lines: s.lines.map(function (l) { return { k: l.k, name: l.name, price: l.price, qty: l.qty, prov: l.prov }; }) }; store(LKEY, last); saveProf(); }
   function reorderBtn() {
@@ -240,6 +241,48 @@
     $('sug-go').onclick = function () { run(); };
     $('sug-q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); run(); } });
   })();
+
+
+  /* location + nearest branch (kept in memory only) */
+  var BR = [
+    { v: 'السويس (التحرير)', lat: 29.9661587, lon: 32.5542186 },
+    { v: 'الملاحة الجديدة', lat: 29.9655853, lon: 32.5402279 },
+    { v: 'السلام', lat: 29.9986616, lon: 32.4905024 }
+  ];
+  function km(a, b, c, d) { var r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r, h = Math.sin(x / 2) * Math.sin(x / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) * Math.sin(y / 2); return 12742 * Math.asin(Math.sqrt(h)); }
+  $('geo-btn').onclick = function () {
+    var res = $('geo-res'); res.hidden = false;
+    if (geo) { geo = null; res.hidden = true; $('geo-btn').textContent = '📍 حدد موقعي'; buildLink(); return; }
+    if (!navigator.geolocation) { res.textContent = 'المتصفح ده مش بيدعم تحديد الموقع. اكتب العنوان بإيدك.'; return; }
+    res.textContent = 'بنحدد موقعك...';
+    navigator.geolocation.getCurrentPosition(function (p) {
+      geo = { lat: p.coords.latitude, lon: p.coords.longitude };
+      var best = null; BR.forEach(function (b) { var d = km(geo.lat, geo.lon, b.lat, b.lon); if (!best || d < best.d) best = { b: b, d: d }; });
+      var msg = 'تمام، هنضيف رابط موقعك على رسالة الطلب (التوصيل بس).';
+      if (best.d <= 40) { $('branch').value = best.b.v; msg += ' أقرب فرع ليك: ' + best.b.v + ' (حوالي ' + ar(best.d < 10 ? best.d.toFixed(1) : Math.round(best.d)) + ' كم). اخترناه، وتقدر تغيّره.'; }
+      else msg += ' إنت بعيد عن فروعنا في السويس، اختار الفرع بإيدك.';
+      res.textContent = msg; $('geo-btn').textContent = 'إلغاء الموقع'; buildLink(); saveProf();
+    }, function (e) { geo = null; res.textContent = e && e.code === 1 ? 'ماوافقتش على الموقع، عادي. اكتب العنوان بإيدك.' : 'مقدرناش نحدد موقعك. اكتب العنوان بإيدك.'; }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
+  };
+
+  /* optional AI suggestion: one per device per day, falls back to the rule-based answer */
+  var AIURL = 'https://rawash-suggest.karimanpary.workers.dev/';
+  $('ai-btn').onclick = function () {
+    var q = $('sug-q').value.trim(), btn = $('ai-btn'), day = new Date().toISOString().slice(0, 10);
+    if (q.length < 2) { $('sug-res').textContent = ''; $('sug-res').appendChild(el('p', 'sugnote', 'اكتب الأول إنت عايز إيه في الخانة اللي فوق.')); return; }
+    var used = load('rawash.ai.v1', ''); if (used === day) { $('sug-res').textContent = ''; $('sug-res').appendChild(el('p', 'sugnote', 'استخدمت الاقتراح بالذكاء الاصطناعي النهاردة. جرّب بكرة، أو استخدم زر رشّحلي العادي.')); return; }
+    btn.disabled = true; btn.textContent = 'بنفكر...';
+    var ctl = new AbortController(); var tm = setTimeout(function () { ctl.abort(); }, 15000);
+    fetch(AIURL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q: q, n: ALL.length }), signal: ctl.signal }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (o) {
+      clearTimeout(tm); if (!o.ok || !o.j.ids || !o.j.ids.length) throw new Error('x');
+      store('rawash.ai.v1', day);
+      var items = o.j.ids.map(function (i) { return ALL[i]; }).filter(Boolean);
+      showSug({ items: items, tags: [], total: items.length, budget: null }, q);
+      var box = $('sug-res'); box.insertBefore(el('p', 'sugnote', 'اقتراح بالذكاء الاصطناعي من أسماء الأصناف بس، ممكن يغلط. اسأل المطعم عن المكونات.'), box.firstChild);
+    }).catch(function () {
+      showSug(suggest(q), q); var box = $('sug-res'); box.insertBefore(el('p', 'sugnote', 'الذكاء الاصطناعي مش متاح دلوقتي، ده الترشيح العادي.'), box.firstChild);
+    }).then(function () { clearTimeout(tm); btn.disabled = false; btn.textContent = 'جرّب الاقتراح بالذكاء الاصطناعي (مرة في اليوم)'; });
+  };
 
   /* install guide */
   var ua = navigator.userAgent, isIOS = /iphone|ipad|ipod/i.test(ua), isAnd = /android/i.test(ua), inApp = /FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua);

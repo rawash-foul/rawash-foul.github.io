@@ -39,6 +39,7 @@
   <h2>مش عارف تطلب إيه؟ رشّحلي</h2>
   <div class="chips" id="sug-chips"></div>
   <div class="sugrow"><input id="sug-q" type="text" placeholder="اكتب: صيامي، بيض بالجبنة، حاجة بـ٥٠ جنيه..." aria-label="رشّحلي" enterkeyhint="go"><button type="button" id="sug-go">رشّحلي</button></div>
+  <button type="button" class="aibtn" id="ai-btn">جرّب الاقتراح بالذكاء الاصطناعي (مرة في اليوم)</button>
   <div id="sug-res"></div>
 </section>
 <div class="sticky">
@@ -118,6 +119,11 @@
     <label class="field" id="addr-f">العنوان
       <input id="address" type="text" autocomplete="street-address" placeholder="اكتب عنوان التوصيل بالتفصيل">
     </label>
+    <div class="geo" id="geo-box">
+      <button type="button" id="geo-btn">📍 حدد موقعي</button>
+      <p class="muted" id="geo-note">اختياري. المتصفح هيسألك الأول، ولو وافقت هنضيف رابط موقعك (خرائط جوجل) على رسالة الطلب بس ونقترح أقرب فرع. الموقع مش بيتحفظ على الجهاز ولا بيتبعت غير مع طلبك. وتقدر تكتب العنوان بإيدك عادي.</p>
+      <p class="geores" id="geo-res" hidden></p>
+    </div>
     <label class="field">ملاحظات
       <textarea id="notes" rows="2" placeholder="مثلاً: من غير شطة، زيادة طحينة"></textarea>
     </label>

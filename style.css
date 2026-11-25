@@ -120,3 +120,9 @@ section.cat h2:before{content:"";width:5px;height:22px;border-radius:3px;backgro
 .sugrow button{min-height:46px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;padding:0 16px}
 .sugnote{font-size:13px;color:#5a4a3f;background:#f3e8d3;border-radius:10px;padding:8px 12px;line-height:1.8}
 .sugitem{background:#fff}
+
+.geo{margin:6px 0 10px}
+.geo button{min-height:44px;border:1px solid var(--gold2);background:#fff;border-radius:12px;padding:0 14px;font-weight:700;color:var(--ink)}
+.geores{font-size:14px;background:#eaf5e6;border-radius:10px;padding:8px 12px;line-height:1.8}
+.aibtn{margin-top:8px;width:100%;min-height:44px;border:1px dashed var(--gold2);background:#fffdf6;border-radius:12px;font-weight:700;color:var(--ink)}
+.aibtn[disabled]{opacity:.55}
