@@ -3,36 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>فول محمود رواش</title>
-<meta name="theme-color" content="#4a3436">
+<title>فول محمود رواش | اطلب أونلاين</title>
+<meta name="description" content="منيو فول محمود رواش، أصل الحكاية من سنة ١٩١٤. اطلب على واتساب.">
+<meta name="theme-color" content="#2b1d1a">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="رواش">
+<meta name="apple-mobile-web-app-title" content="فول محمود رواش">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <img src="icon-192.png" alt="شعار فول محمود رواش" class="logo">
-  <div><h1>فول محمود رواش</h1><p>رواش أصل الحكاية، من سنة ١٩١٤</p></div>
-  <button id="install" class="install" hidden type="button">ثبّت التطبيق</button>
+<div class="offline" id="offline" hidden>مفيش نت دلوقتي، المنيو شغال بس الإرسال محتاج نت</div>
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-in">
+    <div class="brandrow">
+      <img src="icon-192.png" alt="شعار فول محمود رواش" class="logo">
+      <button id="install" class="install" hidden type="button">ثبّت التطبيق</button>
+      <button id="share" class="ghost" type="button" hidden aria-label="مشاركة">مشاركة</button>
+    </div>
+    <h1>فول محمود رواش</h1>
+    <p class="tag">رواش أصل الحكاية، من سنة ١٩١٤</p>
+    <div class="cta">
+      <a class="btn wa" id="hero-wa" href="#" target="_blank" rel="noopener">اطلب على واتساب</a>
+      <a class="btn alt" id="hero-call" href="#">اتصل بينا</a>
+    </div>
+    <button type="button" class="reorder" id="reorder" hidden></button>
+  </div>
 </header>
-<nav id="cats" class="cats" aria-label="أقسام المنيو"></nav>
+<div class="ios" id="ios" hidden>على الآيفون: من سفاري دوس مشاركة ثم "إضافة إلى الشاشة الرئيسية" <button type="button" id="ios-x" aria-label="إغلاق">×</button></div>
+<div class="sticky">
+  <div class="search"><input id="q" type="search" placeholder="دوّر على صنف... (فول، طعمية، بطاطس)" aria-label="بحث في المنيو" enterkeyhint="search"></div>
+  <nav id="cats" class="cats" aria-label="أقسام المنيو"></nav>
+</div>
 <p class="note" id="note"></p>
 <main id="menu"></main>
+<p class="empty" id="empty" hidden>مفيش صنف بالاسم ده. جرّب كلمة تانية أو كلمنا واتساب.</p>
 <section class="branches" id="branches"></section>
+<footer class="foot">فول محمود رواش · أصل الحكاية من سنة ١٩١٤</footer>
 <div id="spacer"></div>
+<button type="button" id="top" class="totop" hidden aria-label="لأعلى">↑</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <footer class="cartbar" id="cartbar" hidden>
-  <button type="button" id="open-cart"><span id="cart-count"></span><span id="cart-total"></span><span>شوف الطلب</span></button>
+  <button type="button" id="open-cart"><span class="badge" id="cart-count"></span><span>شوف الطلب</span><span id="cart-total"></span></button>
 </footer>
 <div class="sheet" id="sheet" hidden role="dialog" aria-label="طلبك">
   <div class="sheet-inner">
+    <div class="grab"></div>
     <div class="sheet-head"><h2>طلبك</h2><button type="button" id="close-cart" aria-label="إغلاق">×</button></div>
     <div id="lines"></div>
     <p class="total" id="total"></p>
     <p class="muted" id="prov" hidden>في أصناف أسعارها لسه مبدئية (من منيو أبريل ٢٠٢٦) والمطعم هيأكد السعر.</p>
+    <div class="seg" role="group" aria-label="طريقة الاستلام">
+      <button type="button" data-m="توصيل" class="on">توصيل</button>
+      <button type="button" data-m="استلام من الفرع">استلام من الفرع</button>
+    </div>
     <label class="field">الفرع
       <select id="branch">
         <option value="السويس (التحرير)">السويس (التحرير)</option>
@@ -40,12 +68,21 @@
         <option value="السلام">السلام</option>
       </select>
     </label>
-    <label class="field">العنوان
-      <input id="address" type="text" autocomplete="street-address" placeholder="اكتب عنوان التوصيل">
+    <label class="field">الاسم
+      <input id="name" type="text" autocomplete="name" placeholder="اسمك">
     </label>
-    <a class="send" id="send" href="#">ابعت الطلب على واتساب</a>
+    <label class="field">رقم الموبايل
+      <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01xxxxxxxxx">
+    </label>
+    <label class="field" id="addr-f">العنوان
+      <input id="address" type="text" autocomplete="street-address" placeholder="اكتب عنوان التوصيل بالتفصيل">
+    </label>
+    <label class="field">ملاحظات
+      <textarea id="notes" rows="2" placeholder="مثلاً: من غير شطة، زيادة طحينة"></textarea>
+    </label>
+    <a class="send" id="send" href="#" target="_blank" rel="noopener">ابعت الطلب على واتساب</a>
     <button type="button" class="clear" id="clear">فضّي الطلب</button>
-    <p class="muted">هيفتح واتساب برسالة جاهزة. الطلب بيتأكد من المطعم بعد ما يستلم الرسالة، والإجمالي بدون التوصيل.</p>
+    <p class="muted">هيفتح واتساب برسالة جاهزة. الطلب بيتأكد من المطعم بعد ما يستلم الرسالة، والإجمالي بدون التوصيل. بياناتك محفوظة على موبايلك بس.</p>
   </div>
 </div>
 <script src="app.js"></script>
