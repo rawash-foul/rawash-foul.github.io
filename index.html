@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>فول محمود رواش</title>
+<meta name="theme-color" content="#4a3436">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="رواش">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <img src="icon-192.png" alt="شعار فول محمود رواش" class="logo">
+  <div><h1>فول محمود رواش</h1><p>رواش أصل الحكاية، من سنة ١٩١٤</p></div>
+  <button id="install" class="install" hidden type="button">ثبّت التطبيق</button>
+</header>
+<nav id="cats" class="cats" aria-label="أقسام المنيو"></nav>
+<p class="note" id="note"></p>
+<main id="menu"></main>
+<section class="branches" id="branches"></section>
+<div id="spacer"></div>
+<footer class="cartbar" id="cartbar" hidden>
+  <button type="button" id="open-cart"><span id="cart-count"></span><span id="cart-total"></span><span>شوف الطلب</span></button>
+</footer>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="طلبك">
+  <div class="sheet-inner">
+    <div class="sheet-head"><h2>طلبك</h2><button type="button" id="close-cart" aria-label="إغلاق">×</button></div>
+    <div id="lines"></div>
+    <p class="total" id="total"></p>
+    <p class="muted" id="prov" hidden>في أصناف أسعارها لسه مبدئية (من منيو أبريل ٢٠٢٦) والمطعم هيأكد السعر.</p>
+    <label class="field">الفرع
+      <select id="branch">
+        <option value="السويس (التحرير)">السويس (التحرير)</option>
+        <option value="الملاحة الجديدة">الملاحة الجديدة</option>
+        <option value="السلام">السلام</option>
+      </select>
+    </label>
+    <label class="field">العنوان
+      <input id="address" type="text" autocomplete="street-address" placeholder="اكتب عنوان التوصيل">
+    </label>
+    <a class="send" id="send" href="#">ابعت الطلب على واتساب</a>
+    <button type="button" class="clear" id="clear">فضّي الطلب</button>
+    <p class="muted">هيفتح واتساب برسالة جاهزة. الطلب بيتأكد من المطعم بعد ما يستلم الرسالة، والإجمالي بدون التوصيل.</p>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

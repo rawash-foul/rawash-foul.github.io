@@ -1,0 +1,17 @@
+{
+  "name": "فول محمود رواش",
+  "short_name": "رواش",
+  "description": "منيو فول محمود رواش واطلب على واتساب",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fdfcfb",
+  "theme_color": "#4a3436",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
