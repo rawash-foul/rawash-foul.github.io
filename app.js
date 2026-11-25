@@ -31,6 +31,7 @@
 
   function buildItem(it, c, prov) {
         var row = el('div', 'item' + (it.prices ? '' : ' single')); row.dataset.s = norm(it.name + ' ' + c.title);
+        if (it.img) { var im = el('img', 'ph'); im.src = it.img; im.loading = 'lazy'; im.alt = it.name; im.width = 64; im.height = 64; row.appendChild(im); row.className += ' hasimg'; }
         if (it.prices) {
           row.appendChild(el('div', 'name', it.name));
           if (it.detail) row.appendChild(el('div', 'detail', it.detail));
@@ -61,7 +62,7 @@
       menu.appendChild(sec);
     });
     var b = $('branches'); b.textContent = ''; b.appendChild(el('h2', '', 'الفروع والتواصل'));
-    data.branches.forEach(function (x) { var c = el('div', 'bcard' + (x.name.indexOf('مدينتي') > -1 ? ' warn' : '')); c.appendChild(el('b', '', x.name)); c.appendChild(el('span', '', x.detail));
+    data.branches.forEach(function (x) { var c = el('div', 'bcard' + (x.name.indexOf('مدينتي') > -1 ? ' warn' : '')); c.appendChild(el('b', '', x.name)); c.appendChild(el('span', 'open24', 'مفتوح ٢٤ ساعة')); c.appendChild(el('span', '', x.detail));
       var T = x.name.indexOf('السويس') > -1 ? ['https://www.talabat.com/ar/egypt/restaurant/795372/mahmoud-rawash-express-al-safaa?aid=6965', 'اطلب من طلبات (رواش إكسبريس)'] : x.name.indexOf('الملاحة') > -1 ? ['https://www.talabat.com/ar/egypt/restaurant/784729/foul-mahmoud-rawash-el-corniche-el-gedid?aid=6965', 'اطلب من طلبات'] : x.name.indexOf('السلام') > -1 ? ['https://www.talabat.com/ar/egypt/restaurant/784728/foul-mahmoud-rawash-sharea-othman-ebn-afaan?aid=6975', 'اطلب من طلبات'] : null;
       if (T) { var tr = el('div', 'brow'); var ta = el('a', '', T[1]); ta.href = T[0]; ta.target = '_blank'; ta.rel = 'noopener'; tr.appendChild(ta); c.appendChild(tr); }
       b.appendChild(c); });
