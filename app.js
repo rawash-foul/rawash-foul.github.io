@@ -9,7 +9,7 @@
   var cart = load(KEY, {}), prof = load(PKEY, { mode: 'توصيل' }), last = load(LKEY, null);
   var ENDPOINT = '', TOKEN = '';
   var pay = 'كاش عند الاستلام';
-  var geo = null, data, hotline, steppers = [], mode = prof.mode || 'توصيل';
+  var lastBranch = null, geo = null, data, hotline, steppers = [], mode = prof.mode || 'توصيل';
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   var toastT;
@@ -81,7 +81,23 @@
     return { n: n, t: t, prov: prov, lines: lines };
   }
 
+  function fillAreas() {
+    var sel = $('area'), prev = sel.value || prof.area || '', list = (window.AREAS || {})[$('branch').value] || [];
+    sel.textContent = '';
+    var o0 = el('option', '', 'اختار المنطقة'); o0.value = ''; sel.appendChild(o0);
+    list.forEach(function (r) { var o = el('option', '', r[0] + ' (' + ar(r[1]) + ' ج)'); o.value = r[0]; sel.appendChild(o); });
+    var ask = el('option', '', 'منطقة تانية (اسأل المطعم)'); ask.value = '__ask'; sel.appendChild(ask);
+    sel.value = prev; if (sel.value !== prev) sel.value = '';
+  }
+  function areaFee() {
+    if (mode !== 'توصيل') return null;
+    var v = $('area').value, list = (window.AREAS || {})[$('branch').value] || [];
+    for (var i = 0; i < list.length; i++) if (list[i][0] === v) return list[i][1];
+    return null;
+  }
+  function areaName() { var v = $('area').value; return v === '__ask' ? 'منطقة تانية (محتاج أعرف الرسوم)' : v; }
   function refresh() {
+    if (lastBranch !== $('branch').value) { lastBranch = $('branch').value; fillAreas(); }
     steppers.forEach(function (d) { d(); });
     var s = totals();
     $('cartbar').hidden = s.n === 0;
@@ -92,16 +108,17 @@
       var st = el('span', 'step'); var m = el('button', '', '−'); m.type = 'button'; m.onclick = function () { rem(l.k); }; var q = el('span', 'q', ar(l.qty)); var p = el('button', 'add', '+'); p.type = 'button'; p.onclick = function () { add(l.k, l.name, l.price, l.prov); };
       st.appendChild(m); st.appendChild(q); st.appendChild(p); r.appendChild(st); L.appendChild(r);
     });
-    $('total').textContent = 'الإجمالي: ' + ar(s.t) + ' ج (بدون التوصيل)';
+    var fe = areaFee(); $('total').textContent = fe !== null ? 'الإجمالي: ' + ar(s.t) + ' + ' + ar(fe) + ' توصيل = ' + ar(s.t + fe) + ' ج' : 'الإجمالي: ' + ar(s.t) + ' ج (بدون التوصيل)';
+    var fn = $('fee-note'); fn.hidden = mode !== 'توصيل' || !s.n; fn.textContent = $('area').value === '__ask' ? 'المطعم هيقولك رسوم التوصيل لمنطقتك لما يأكد الطلب.' : fe !== null ? 'رسوم التوصيل لمنطقة ' + areaName() + ': ' + ar(fe) + ' ج. المطعم بيأكد الإجمالي النهائي معاك.' : 'اختار منطقتك علشان تعرف رسوم التوصيل.';
     $('prov').hidden = !s.prov;
     if (s.n === 0) $('sheet').hidden = true;
     buildLink(); reorderBtn();
   }
 
-  function ready() { var s = totals(); if (!s.n) return false; if (mode === 'توصيل' && !$('address').value.trim()) return false; return true; }
+  function ready() { var s = totals(); if (!s.n) return false; if (mode === 'توصيل' && (!$('address').value.trim() || !$('area').value)) return false; return true; }
   function orderText(lines, t) {
     var body = lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : '') + ' = ' + (l.qty * l.price) + ' ج'; }).join('\n');
-    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي أو محفظة' ? 'إنستاباي أو محفظة (هستنى تأكيدكم بالإجمالي مع التوصيل وبعدها هحوّل وأبعت الإيصال)' : pay) + '\n\n' + body + '\n\nالإجمالي: ' + t + ' ج (بدون التوصيل)';
+    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي أو محفظة' ? 'إنستاباي أو محفظة (هستنى تأكيدكم بالإجمالي مع التوصيل وبعدها هحوّل وأبعت الإيصال)' : pay) + '\n\n' + body + '\n\n' + (areaFee() !== null ? 'الإجمالي: ' + t + ' ج\nرسوم التوصيل (' + areaName() + '): ' + areaFee() + ' ج\nالإجمالي شامل التوصيل: ' + (t + areaFee()) + ' ج' : 'الإجمالي: ' + t + ' ج (بدون التوصيل)') + (mode === 'توصيل' && $('area').value === '__ask' ? '\nالمنطقة: مش في القايمة، محتاج أعرف رسوم التوصيل' : '');
     if ($('name').value.trim()) x += '\nالاسم: ' + $('name').value.trim();
     if ($('phone').value.trim()) x += '\nالموبايل: ' + $('phone').value.trim();
     if (mode === 'توصيل') x += '\nالعنوان: ' + $('address').value.trim();
@@ -113,10 +130,10 @@
     var s = totals(); var a = $('send');
     a.href = 'https://wa.me/2' + hotline + '?text=' + encodeURIComponent(orderText(s.lines, s.t));
     var ok = ready(); a.classList.toggle('dis', !ok);
-    a.textContent = s.n && mode === 'توصيل' && !$('address').value.trim() ? 'اكتب العنوان الأول' : 'ابعت الطلب على واتساب';
-    $('addr-f').hidden = mode !== 'توصيل';
+    a.textContent = s.n && mode === 'توصيل' && !$('area').value ? 'اختار المنطقة الأول' : s.n && mode === 'توصيل' && !$('address').value.trim() ? 'اكتب العنوان الأول' : 'ابعت الطلب على واتساب';
+    $('addr-f').hidden = mode !== 'توصيل'; $('area-f').hidden = mode !== 'توصيل';
   }
-  function saveProf() { store(PKEY, { mode: mode, name: $('name').value, phone: $('phone').value, address: $('address').value, branch: $('branch').value }); }
+  function saveProf() { store(PKEY, { mode: mode, name: $('name').value, phone: $('phone').value, address: $('address').value, branch: $('branch').value, area: $('area').value }); }
   function sendToSheet(s) {
     if (!ENDPOINT || !$('consent').checked) return;
     var items = s.lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : ''); }).join('\n');
@@ -146,6 +163,8 @@
     $('empty').hidden = any;
   }
 
+  $('area').onchange = function () { saveProf(); refresh(); };
+  $('branch').addEventListener('change', function () { refresh(); });
   $('open-cart').onclick = function () { $('sheet').hidden = false; };
   $('close-cart').onclick = function () { $('sheet').hidden = true; };
   $('sheet').onclick = function (e) { if (e.target === $('sheet')) $('sheet').hidden = true; };
