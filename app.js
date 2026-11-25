@@ -115,13 +115,13 @@
     buildLink(); reorderBtn();
   }
 
-  function ready() { var s = totals(); if (!s.n) return false; if (mode === 'توصيل' && (!$('address').value.trim() || !$('area').value)) return false; return true; }
+  function ready() { var s = totals(); if (!s.n) return false; if (mode === 'توصيل' && (!$('area').value || (!geo && !$('address').value.trim()))) return false; return true; }
   function orderText(lines, t) {
     var body = lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : '') + ' = ' + (l.qty * l.price) + ' ج'; }).join('\n');
     var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي أو محفظة' ? 'إنستاباي أو محفظة (هستنى تأكيدكم بالإجمالي مع التوصيل وبعدها هحوّل وأبعت الإيصال)' : pay) + '\n\n' + body + '\n\n' + (areaFee() !== null ? 'الإجمالي: ' + t + ' ج\nرسوم التوصيل (' + areaName() + '): ' + areaFee() + ' ج\nالإجمالي شامل التوصيل: ' + (t + areaFee()) + ' ج' : 'الإجمالي: ' + t + ' ج (بدون التوصيل)') + (mode === 'توصيل' && $('area').value === '__ask' ? '\nالمنطقة: مش في القايمة، محتاج أعرف رسوم التوصيل' : '');
     if ($('name').value.trim()) x += '\nالاسم: ' + $('name').value.trim();
     if ($('phone').value.trim()) x += '\nالموبايل: ' + $('phone').value.trim();
-    if (mode === 'توصيل') x += '\nالعنوان: ' + $('address').value.trim();
+    if (mode === 'توصيل' && $('address').value.trim()) x += '\nعمارة/دور/علامة: ' + $('address').value.trim();
     if (geo && mode === 'توصيل') x += '\nموقعي على الخريطة: https://www.google.com/maps?q=' + geo.lat.toFixed(5) + ',' + geo.lon.toFixed(5);
     if ($('notes').value.trim()) x += '\nملاحظات: ' + $('notes').value.trim();
     return x;
@@ -130,7 +130,7 @@
     var s = totals(); var a = $('send');
     a.href = 'https://wa.me/2' + hotline + '?text=' + encodeURIComponent(orderText(s.lines, s.t));
     var ok = ready(); a.classList.toggle('dis', !ok);
-    a.textContent = s.n && mode === 'توصيل' && !$('area').value ? 'اختار المنطقة الأول' : s.n && mode === 'توصيل' && !$('address').value.trim() ? 'اكتب العنوان الأول' : 'ابعت الطلب على واتساب';
+    a.textContent = s.n && mode === 'توصيل' && !$('area').value ? 'اختار المنطقة الأول' : s.n && mode === 'توصيل' && !geo && !$('address').value.trim() ? 'حدد موقعك أو اكتب العنوان' : 'ابعت الطلب على واتساب';
     $('addr-f').hidden = mode !== 'توصيل'; $('area-f').hidden = mode !== 'توصيل';
   }
   function saveProf() { store(PKEY, { mode: mode, name: $('name').value, phone: $('phone').value, address: $('address').value, branch: $('branch').value, area: $('area').value }); }
@@ -270,20 +270,39 @@
     { v: 'السلام', lat: 29.9986616, lon: 32.4905024 }
   ];
   function km(a, b, c, d) { var r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r, h = Math.sin(x / 2) * Math.sin(x / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) * Math.sin(y / 2); return 12742 * Math.asin(Math.sqrt(h)); }
-  $('geo-btn').onclick = function () {
+  function pickArea(br) {
+    var pts = (window.AREAGEO || {})[br] || [], list = (window.AREAS || {})[br] || [], c = [];
+    pts.forEach(function (p) { if (list.some(function (r) { return r[0] === p[0]; })) c.push({ n: p[0], d: km(geo.lat, geo.lon, p[1], p[2]) }); });
+    c.sort(function (x, y) { return x.d - y.d; });
+    return c;
+  }
+  function locate(auto) {
     var res = $('geo-res'); res.hidden = false;
-    if (geo) { geo = null; res.hidden = true; $('geo-btn').textContent = '📍 حدد موقعي'; buildLink(); return; }
-    if (!navigator.geolocation) { res.textContent = 'المتصفح ده مش بيدعم تحديد الموقع. اكتب العنوان بإيدك.'; return; }
+    if (!navigator.geolocation) { res.textContent = 'المتصفح ده مش بيدعم تحديد الموقع. اختار الفرع والمنطقة بإيدك.'; return; }
     res.textContent = 'بنحدد موقعك...';
     navigator.geolocation.getCurrentPosition(function (p) {
       geo = { lat: p.coords.latitude, lon: p.coords.longitude };
       var best = null; BR.forEach(function (b) { var d = km(geo.lat, geo.lon, b.lat, b.lon); if (!best || d < best.d) best = { b: b, d: d }; });
-      var msg = 'تمام، هنضيف رابط موقعك على رسالة الطلب (التوصيل بس).';
-      if (best.d <= 40) { $('branch').value = best.b.v; msg += ' أقرب فرع ليك: ' + best.b.v + ' (حوالي ' + ar(best.d < 10 ? best.d.toFixed(1) : Math.round(best.d)) + ' كم). اخترناه، وتقدر تغيّره.'; }
-      else msg += ' إنت بعيد عن فروعنا في السويس، اختار الفرع بإيدك.';
-      res.textContent = msg; $('geo-btn').textContent = 'إلغاء الموقع'; buildLink(); saveProf();
-    }, function (e) { geo = null; res.textContent = e && e.code === 1 ? 'ماوافقتش على الموقع، عادي. اكتب العنوان بإيدك.' : 'مقدرناش نحدد موقعك. اكتب العنوان بإيدك.'; }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
+      var msg = 'تمام، رابط موقعك هيتضاف على رسالة الطلب (للتوصيل بس).';
+      if (best.d <= 40) {
+        $('branch').value = best.b.v; lastBranch = best.b.v; $('area').value = ''; prof.area = ''; fillAreas();
+        msg += ' أقرب فرع ليك: ' + best.b.v + ' (حوالي ' + ar(best.d < 10 ? best.d.toFixed(1) : Math.round(best.d)) + ' كم)، فتحنا منيو الفرع ده.';
+        var c = pickArea(best.b.v);
+        if (c.length && c[0].d <= 0.8) { $('area').value = c[0].n; msg += ' المنطقة: ' + c[0].n + '. تأكد منها وغيرها لو غلط.'; }
+        else if (c.length && c[0].d <= 3) { msg += ' اختار منطقتك من القايمة (الأقرب: ' + c.slice(0, 3).filter(function (x) { return x.d <= 3; }).map(function (x) { return x.n; }).join('، ') + ').'; }
+        else msg += ' اختار منطقتك من القايمة.';
+      } else msg += ' إنت بعيد عن فروعنا في السويس، اختار الفرع والمنطقة بإيدك.';
+      res.textContent = msg; $('geo-btn').textContent = 'إلغاء الموقع'; refresh(); saveProf();
+    }, function (e) { geo = null; res.textContent = e && e.code === 1 ? 'ماوافقتش على الموقع، عادي. اختار الفرع والمنطقة بإيدك.' : 'مقدرناش نحدد موقعك. اختار الفرع والمنطقة بإيدك.'; if (auto) res.hidden = false; buildLink(); }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 });
+  }
+  $('geo-btn').onclick = function () {
+    if (geo) { geo = null; $('geo-res').hidden = true; $('geo-btn').textContent = '📍 حدد موقعي وهنختار المنطقة تلقائي'; buildLink(); return; }
+    locate(false);
   };
+  try {
+    if (navigator.permissions && navigator.permissions.query) navigator.permissions.query({ name: 'geolocation' }).then(function (r) { if (r.state !== 'denied') locate(true); });
+    else locate(true);
+  } catch (e) {}
 
   /* optional AI suggestion: one per device per day, falls back to the rule-based answer */
   var AIURL = 'https://rawash-suggest.karimanpary.workers.dev/';
