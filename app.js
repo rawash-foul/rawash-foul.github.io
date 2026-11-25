@@ -31,7 +31,7 @@
 
   function buildItem(it, c, prov) {
         var row = el('div', 'item' + (it.prices ? '' : ' single')); row.dataset.s = norm(it.name + ' ' + c.title);
-        if (it.img) { var im = el('img', 'ph'); im.src = it.img; im.loading = 'lazy'; im.alt = it.name; im.width = 64; im.height = 64; row.appendChild(im); row.className += ' hasimg'; }
+        if (it.img) { var im = el('img', 'ph'); im.src = it.img; im.loading = 'lazy'; im.alt = it.name; im.width = 64; im.height = 64; row.appendChild(im); row.className += ' hasimg'; } else { var pl = el('img', 'ph phold'); pl.src = 'icon-192.png'; pl.loading = 'lazy'; pl.alt = ''; pl.setAttribute('aria-hidden', 'true'); pl.width = 64; pl.height = 64; row.appendChild(pl); row.className += ' hasimg'; }
         if (it.prices) {
           row.appendChild(el('div', 'name', it.name));
           if (it.detail) row.appendChild(el('div', 'detail', it.detail));
