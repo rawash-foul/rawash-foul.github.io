@@ -101,7 +101,7 @@
   function ready() { var s = totals(); if (!s.n) return false; if (mode === 'توصيل' && !$('address').value.trim()) return false; return true; }
   function orderText(lines, t) {
     var body = lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : '') + ' = ' + (l.qty * l.price) + ' ج'; }).join('\n');
-    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي أو محفظة' ? 'دفع إنستاباي أو محفظة (هبعت الإيصال)' : pay) + '\n\n' + body + '\n\nالإجمالي: ' + t + ' ج (بدون التوصيل)';
+    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي أو محفظة' ? 'إنستاباي أو محفظة (هستنى تأكيدكم بالإجمالي مع التوصيل وبعدها هحوّل وأبعت الإيصال)' : pay) + '\n\n' + body + '\n\nالإجمالي: ' + t + ' ج (بدون التوصيل)';
     if ($('name').value.trim()) x += '\nالاسم: ' + $('name').value.trim();
     if ($('phone').value.trim()) x += '\nالموبايل: ' + $('phone').value.trim();
     if (mode === 'توصيل') x += '\nالعنوان: ' + $('address').value.trim();
