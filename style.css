@@ -4,16 +4,17 @@ html{scroll-behavior:smooth}
 html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Noto Naskh Arabic","Geeza Pro","Segoe UI",Tahoma,system-ui,sans-serif;-webkit-text-size-adjust:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 .offline{background:#7a2e1f;color:#fff;text-align:center;font-size:13px;padding:6px 10px}
-.hero{position:relative;color:#fff;overflow:hidden;padding:calc(14px + env(safe-area-inset-top)) 18px 22px;background:var(--brand)}
-.hero-bg{position:absolute;inset:0;background:linear-gradient(180deg,rgba(43,29,26,.55),rgba(43,29,26,.94)),url(hero.jpg) center/cover}
+.hero{position:relative;color:#fff;overflow:hidden;padding:calc(14px + env(safe-area-inset-top)) 18px 22px;background:#963922;border-radius:0 0 28px 28px}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(180deg,rgba(150,57,34,.78),rgba(110,38,22,.96)),url(hero.jpg) center/cover}
 .hero-in{position:relative}
 .brandrow{display:flex;align-items:center;gap:10px}
-.logo{width:64px;height:64px;border-radius:16px;border:2px solid var(--gold2);box-shadow:0 6px 18px rgba(0,0,0,.35);background:#e8d9c0}
+.logo{width:76px;height:76px;border-radius:20px;border:3px solid #fff;box-shadow:0 8px 22px rgba(0,0,0,.3);background:#fff;object-fit:contain}
 .install,.ghost{margin-inline-start:auto;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:22px;padding:8px 16px;font-weight:700;min-height:44px;backdrop-filter:blur(6px)}
 .install{background:var(--gold);border-color:var(--gold2)}
 .ghost{margin-inline-start:0}
 h1{font-size:30px;margin:14px 0 2px;letter-spacing:.2px}
-.tag{margin:0;color:var(--gold2);font-size:15px}
+.tag{margin:0;color:#f6dcb4;font-size:15px}
+.strip{display:flex;gap:8px;margin-top:14px}.strip img{flex:1;min-width:0;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid rgba(255,255,255,.85);box-shadow:0 4px 10px rgba(0,0,0,.25)}
 .cta{display:flex;gap:10px;margin-top:16px}
 .btn{flex:1;text-align:center;text-decoration:none;font-weight:800;padding:13px 10px;border-radius:14px;min-height:48px;display:flex;align-items:center;justify-content:center}
 .btn.wa{background:var(--wa);color:#fff;box-shadow:0 6px 16px rgba(31,157,85,.35)}
