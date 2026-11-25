@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-title" content="فول محمود رواش">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>#splash{position:fixed;inset:0;z-index:99;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .45s ease}#splash.out{opacity:0;pointer-events:none}#splash img{width:min(52vw,220px);height:auto;border-radius:28px;box-shadow:0 10px 30px rgba(150,57,34,.18);animation:sp .9s ease both}#splash b{font-size:26px;color:#963922;animation:sp .9s .15s ease both}#splash i{font-style:normal;color:#8a6b5e;font-size:14px;animation:sp .9s .3s ease both}@keyframes sp{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}</style>
-<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 <div id="splash" aria-hidden="true"><img src="icon-512.png" alt="" width="220" height="220"><b>فول محمود رواش</b><i>رواش أصل الحكاية، من سنة ١٩١٤</i></div>
@@ -115,6 +115,11 @@
         <option value="السلام">السلام</option>
       </select>
     </label>
+    <div class="geo" id="geo-box">
+      <button type="button" id="geo-btn">📍 حدد موقعي وهنختار المنطقة تلقائي</button>
+      <p class="muted" id="geo-note">المتصفح هيسألك الأول. لو وافقت هنختار أقرب فرع والمنطقة ونحسب رسوم التوصيل، ونضيف رابط موقعك (خرائط جوجل) على رسالة الطلب بس. الموقع مش بيتحفظ. لو رفضت اختار الفرع والمنطقة بإيدك.</p>
+      <p class="geores" id="geo-res" hidden></p>
+    </div>
     <label class="field" id="area-f">المنطقة (علشان رسوم التوصيل)
       <select id="area"></select>
     </label>
@@ -125,14 +130,9 @@
     <label class="field">رقم الموبايل
       <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01xxxxxxxxx">
     </label>
-    <label class="field" id="addr-f">العنوان
-      <input id="address" type="text" autocomplete="street-address" placeholder="اكتب عنوان التوصيل بالتفصيل">
+    <label class="field" id="addr-f">عمارة / دور / علامة مميزة (اختياري لو حددت موقعك)
+      <input id="address" type="text" autocomplete="street-address" placeholder="مثلاً: عمارة ٥ الدور ٣ جنب الصيدلية">
     </label>
-    <div class="geo" id="geo-box">
-      <button type="button" id="geo-btn">📍 حدد موقعي</button>
-      <p class="muted" id="geo-note">اختياري. المتصفح هيسألك الأول، ولو وافقت هنضيف رابط موقعك (خرائط جوجل) على رسالة الطلب بس ونقترح أقرب فرع. الموقع مش بيتحفظ على الجهاز ولا بيتبعت غير مع طلبك. وتقدر تكتب العنوان بإيدك عادي.</p>
-      <p class="geores" id="geo-res" hidden></p>
-    </div>
     <label class="field">ملاحظات
       <textarea id="notes" rows="2" placeholder="مثلاً: من غير شطة، زيادة طحينة"></textarea>
     </label>
@@ -142,7 +142,8 @@
     <p class="muted">هيفتح واتساب برسالة جاهزة. الطلب بيتأكد من المطعم بعد ما يستلم الرسالة. رسوم التوصيل حسب المنطقة اللي بتختارها، والمطعم بيأكد الإجمالي النهائي معاك. بياناتك محفوظة على موبايلك بس.</p>
   </div>
 </div>
-<script src="areas.js?v=17"></script>
-<script src="app.js?v=17"></script>
+<script src="areas.js?v=18"></script>
+<script src="areageo.js?v=18"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>
