@@ -7,6 +7,8 @@
   function load(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } }
   function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   var cart = load(KEY, {}), prof = load(PKEY, { mode: 'توصيل' }), last = load(LKEY, null);
+  var ENDPOINT = '', TOKEN = '';
+  var pay = 'كاش عند الاستلام';
   var data, hotline, steppers = [], mode = prof.mode || 'توصيل';
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -94,7 +96,7 @@
   function ready() { var s = totals(); if (!s.n) return false; if (mode === 'توصيل' && !$('address').value.trim()) return false; return true; }
   function orderText(lines, t) {
     var body = lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : '') + ' = ' + (l.qty * l.price) + ' ج'; }).join('\n');
-    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\n\n' + body + '\n\nالإجمالي: ' + t + ' ج (بدون التوصيل)';
+    var x = 'أهلاً، عايز أطلب من فول محمود رواش\nالفرع: ' + $('branch').value + '\nالطلب: ' + mode + '\nالدفع: ' + (pay === 'إنستاباي' ? 'دفع إنستاباي (هبعت الإيصال)' : pay) + '\n\n' + body + '\n\nالإجمالي: ' + t + ' ج (بدون التوصيل)';
     if ($('name').value.trim()) x += '\nالاسم: ' + $('name').value.trim();
     if ($('phone').value.trim()) x += '\nالموبايل: ' + $('phone').value.trim();
     if (mode === 'توصيل') x += '\nالعنوان: ' + $('address').value.trim();
@@ -109,7 +111,12 @@
     $('addr-f').hidden = mode !== 'توصيل';
   }
   function saveProf() { store(PKEY, { mode: mode, name: $('name').value, phone: $('phone').value, address: $('address').value, branch: $('branch').value }); }
-  function onSent() { var s = totals(); if (!s.n) return; last = { lines: s.lines.map(function (l) { return { k: l.k, name: l.name, price: l.price, qty: l.qty, prov: l.prov }; }) }; store(LKEY, last); saveProf(); }
+  function sendToSheet(s) {
+    if (!ENDPOINT || !$('consent').checked) return;
+    var items = s.lines.map(function (l) { return l.qty + ' × ' + l.name + (l.prov ? ' (سعر مبدئي)' : ''); }).join('\n');
+    try { fetch(ENDPOINT, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ t: TOKEN, consent: true, name: $('name').value, phone: $('phone').value, branch: $('branch').value, mode: mode + ' / ' + pay, address: mode === 'توصيل' ? $('address').value : '', items: items, total: s.t, notes: $('notes').value }), keepalive: true }); } catch (e) {}
+  }
+  function onSent() { var s = totals(); if (!s.n) return; sendToSheet(s); last = { lines: s.lines.map(function (l) { return { k: l.k, name: l.name, price: l.price, qty: l.qty, prov: l.prov }; }) }; store(LKEY, last); saveProf(); }
   function reorderBtn() {
     var b = $('reorder'); var s = totals();
     if (last && last.lines && last.lines.length && !s.n) { var n = 0; last.lines.forEach(function (l) { n += l.qty; }); b.hidden = false; b.textContent = 'اطلب تاني زي آخر مرة (' + ar(n) + ' أصناف)'; } else b.hidden = true;
@@ -139,7 +146,10 @@
   $('clear').onclick = function () { cart = {}; store(KEY, cart); refresh(); };
   ['branch', 'name', 'phone', 'address', 'notes'].forEach(function (id) { $(id).addEventListener('input', function () { buildLink(); saveProf(); }); $(id).addEventListener('change', function () { buildLink(); saveProf(); }); });
   Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (b) { b.onclick = function () { mode = b.dataset.m; Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (x) { x.classList.toggle('on', x === b); }); saveProf(); buildLink(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#payseg button'), function (b) { b.onclick = function () { pay = b.dataset.p; Array.prototype.forEach.call(document.querySelectorAll('#payseg button'), function (x) { x.classList.toggle('on', x === b); }); $('payinfo').hidden = pay !== 'إنستاباي'; buildLink(); }; });
+  $('paycopy').onclick = function () { var n = '01001844656'; function ok() { toast('اتنسخ الرقم'); } if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(n).then(ok, function () { toast(n); }); else { var t = document.createElement('textarea'); t.value = n; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast(n); } t.remove(); } };
   $('send').addEventListener('click', function (e) { if (!ready()) { e.preventDefault(); toast('اكتب العنوان الأول'); $('address').focus(); return; } onSent(); });
+  if (ENDPOINT) $('consent-w').hidden = false;
   $('reorder').onclick = function () { if (!last) return; last.lines.forEach(function (l) { cart[l.k] = { name: l.name, price: l.price, qty: l.qty, prov: l.prov }; }); store(KEY, cart); refresh(); $('sheet').hidden = false; };
   $('q').addEventListener('input', search);
   $('top').onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };

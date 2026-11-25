@@ -86,6 +86,16 @@
       <button type="button" data-m="توصيل" class="on">توصيل</button>
       <button type="button" data-m="استلام من الفرع">استلام من الفرع</button>
     </div>
+    <p class="lab">طريقة الدفع</p>
+    <div class="seg" id="payseg" role="group" aria-label="طريقة الدفع">
+      <button type="button" data-p="كاش عند الاستلام" class="on">كاش عند الاستلام</button>
+      <button type="button" data-p="إنستاباي">الدفع بإنستاباي</button>
+    </div>
+    <div class="payinfo" id="payinfo" hidden>
+      <p>حوّل الإجمالي بالظبط على إنستاباي أو المحفظة للرقم ده:</p>
+      <div class="paynum"><b id="paynum" dir="ltr">01001844656</b><button type="button" id="paycopy">نسخ الرقم</button></div>
+      <p>بعد التحويل ابعت صورة الإيصال (سكرين شوت) على واتساب المطعم مع الطلب.</p>
+    </div>
     <label class="field">الفرع
       <select id="branch">
         <option value="السويس (التحرير)">السويس (التحرير)</option>
@@ -105,6 +115,7 @@
     <label class="field">ملاحظات
       <textarea id="notes" rows="2" placeholder="مثلاً: من غير شطة، زيادة طحينة"></textarea>
     </label>
+    <label class="consent" id="consent-w" hidden><input type="checkbox" id="consent"><span>بالضغط على إرسال أنت موافق إن المطعم يحفظ اسمك ورقمك وعنوانك وطلبك علشان يجهز الطلب ويتواصل معاك.</span></label>
     <a class="send" id="send" href="#" target="_blank" rel="noopener">ابعت الطلب على واتساب</a>
     <button type="button" class="clear" id="clear">فضّي الطلب</button>
     <p class="muted">هيفتح واتساب برسالة جاهزة. الطلب بيتأكد من المطعم بعد ما يستلم الرسالة، والإجمالي بدون التوصيل. بياناتك محفوظة على موبايلك بس.</p>
