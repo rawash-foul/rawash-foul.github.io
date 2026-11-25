@@ -29,14 +29,7 @@
     draw(); steppers.push(draw); return s;
   }
 
-  function render() {
-    var nav = $('cats'), menu = $('menu'); nav.textContent = ''; menu.textContent = ''; steppers = [];
-    data.categories.forEach(function (c) {
-      var prov = !!(c.note && c.note.indexOf('أبريل') > -1);
-      var a = el('a', '', c.title); a.href = '#c-' + c.id; a.dataset.id = c.id; nav.appendChild(a);
-      var sec = el('section', 'cat'); sec.id = 'c-' + c.id; sec.dataset.id = c.id; sec.appendChild(el('h2', '', c.title));
-      if (c.note) sec.appendChild(el('p', 'sub', c.note));
-      c.items.forEach(function (it) {
+  function buildItem(it, c, prov) {
         var row = el('div', 'item' + (it.prices ? '' : ' single')); row.dataset.s = norm(it.name + ' ' + c.title);
         if (it.prices) {
           row.appendChild(el('div', 'name', it.name));
@@ -54,8 +47,17 @@
           row.appendChild(info);
           row.appendChild(stepper(c.id + '|' + it.name, it.name, it.price, prov));
         }
-        sec.appendChild(row);
-      });
+    return row;
+  }
+
+  function render() {
+    var nav = $('cats'), menu = $('menu'); nav.textContent = ''; menu.textContent = ''; steppers = [];
+    data.categories.forEach(function (c) {
+      var prov = !!(c.note && c.note.indexOf('أبريل') > -1);
+      var a = el('a', '', c.title); a.href = '#c-' + c.id; a.dataset.id = c.id; nav.appendChild(a);
+      var sec = el('section', 'cat'); sec.id = 'c-' + c.id; sec.dataset.id = c.id; sec.appendChild(el('h2', '', c.title));
+      if (c.note) sec.appendChild(el('p', 'sub', c.note));
+      c.items.forEach(function (it) { sec.appendChild(buildItem(it, c, prov)); });
       menu.appendChild(sec);
     });
     var b = $('branches'); b.textContent = ''; b.appendChild(el('h2', '', 'الفروع والتواصل'));
@@ -169,6 +171,76 @@
   Array.prototype.forEach.call(document.querySelectorAll('.seg button'), function (x) { x.classList.toggle('on', x.dataset.m === mode); });
 
 
+
+  /* smart suggestions (rule-based) */
+  var TAGS = {
+    veg: { label: 'صيامي / نباتي', note: 'مفيش فيها بيض ولا جبن ولا سمن ولا لحوم مصنعة حسب اسم الصنف.' },
+    light: { label: 'خفيف', note: 'من غير قلي ولا لحوم مصنعة ولا سمن حسب اسم الصنف. ده مش تصنيف صحي أو سعرات.' },
+    full: { label: 'شبعان', note: 'أطباق وطاسات وميكس فيها أكتر من مكوّن.' },
+    quick: { label: 'سريع', note: 'ساندوتشات ورولات تاكلها وانت ماشي.' },
+    sweet: { label: 'حلو', note: 'سندوتشات الحلو.' },
+    drink: { label: 'مشروبات', note: 'المشروبات الساخنة والباردة.' },
+    cheap: { label: 'الأرخص', note: 'أقل الأصناف سعراً.' }
+  };
+  var MEAT = /بسطرم|سجق|سوسيس|لية|لحوم|فراخ/, DAIRY = /بيض|جبن|موتز|روم|شيدر|كيري|قريش|قشطة|سمن|سمنة|لبن|حليب|عجة|بيتزا|شكشوكة|مدحرج/, FRY = /مقلي|مقلية|صوابع|شيبسي|طعمية|جريل|جريلد|مقلية/;
+  var UNKNOWN = /ميكس|ميجا|ماجنم|ماكس|دايناميت|حكاية|محشية|رواش/;
+  function lowest(it) { return it.prices ? Math.min.apply(null, it.prices) : it.price; }
+  function tagsOf(it, c) {
+    var n = it.name, t = [];
+    var food = ['foul-dishes', 'foul-sandwiches', 'taameya-sandwiches', 'potato-dishes', 'egg-dishes', 'side-dishes', 'potato-sandwiches', 'extra-sandwiches', 'foul-boxes', 'taameya-pieces'].indexOf(c.id) > -1;
+    if (food && !MEAT.test(n) && !DAIRY.test(n) && !UNKNOWN.test(n) && c.id !== 'egg-dishes') t.push('veg');
+    if (food && !MEAT.test(n) && !FRY.test(n) && !/سمن|سمنة|شيدر|موتز|قشطة|لية|ميكس|بيتزا|مقلي/.test(n) && c.id !== 'taameya-pieces') t.push('light');
+    if (c.id === 'pans' || /ميكس|ميجا|ماجنم/.test(n) || (/بيض/.test(n) && MEAT.test(n))) t.push('full');
+    if (/sandwiches|rolls/.test(c.id)) t.push('quick');
+    if (c.id === 'sweet-sandwiches') t.push('sweet');
+    if (c.id === 'drinks') t.push('drink');
+    return t;
+  }
+  var ALL = [];
+  function indexMenu() { ALL = []; data.categories.forEach(function (c) { var prov = !!(c.note && c.note.indexOf('أبريل') > -1); c.items.forEach(function (it) { ALL.push({ it: it, c: c, prov: prov, tags: tagsOf(it, c), s: norm(it.name), low: lowest(it) }); }); }); }
+  var KW = [
+    [/صيام|نباتي|نباتى|vegan/, 'veg'], [/خفيف|صحي|صحى|دايت|لايت|رجيم/, 'light'], [/شبعان|جعان|جوعان|وجبه كامله|وجبه كبيره|غدا|عشا|كبير/, 'full'],
+    [/سريع|ساندوتش|سندوتش|ماشي|رول/, 'quick'], [/حلو|حلويات|نوتيلا|قشطه|عسل|سكر/, 'sweet'], [/مشروب|شاي|قهوه|عصير|اعشاب/, 'drink'], [/ارخص|رخيص|اقتصادي|ميزانيه|وفر/, 'cheap']
+  ];
+  var WORDS = { 'لحمه': 'بسطرم|سجق|سوسيس', 'لحوم': 'بسطرم|سجق|سوسيس', 'جبنه': 'جبن', 'فلافل': 'طعمي', 'طعميه': 'طعمي', 'بطاطس': 'بطاطس|مهروس', 'بيض': 'بيض', 'فول': 'فول', 'سجق': 'سجق', 'بسطرمه': 'بسطرم', 'باذنجان': 'باذنجان', 'مسقعه': 'مسقع' };
+  function suggest(q) {
+    var n = norm(q), tags = [], words = [], budget = null;
+    var m = n.replace(/[٠-٩]/g, function (d) { return AR.indexOf(d); }).match(/(\d{2,3})/); if (m) budget = +m[1];
+    KW.forEach(function (k) { if (k[0].test(n)) tags.push(k[1]); });
+    Object.keys(WORDS).forEach(function (w) { if (n.indexOf(w) > -1) words.push(new RegExp(WORDS[w])); });
+    var res = ALL.filter(function (x) {
+      if (budget && x.low > budget) return false;
+      var ok = true;
+      tags.forEach(function (t) { if (t !== 'cheap' && x.tags.indexOf(t) < 0) ok = false; });
+      words.forEach(function (r) { if (!r.test(x.s)) ok = false; });
+      return ok;
+    });
+    if (!tags.length && !words.length && budget) { res = ALL.filter(function (x) { return x.low <= budget && x.c.id !== 'drinks'; }); res.sort(function (a, b) { return b.low - a.low; }); }
+    else if (!tags.length && !words.length) {
+      var toks = n.split(' ').filter(function (t) { return t.length > 1 && !/^\d+$/.test(t); });
+      res = ALL.filter(function (x) { return (!budget || x.low <= budget) && toks.length && toks.every(function (t) { return x.s.indexOf(t) > -1; }); });
+    }
+    if (!(budget && !tags.length && !words.length)) res.sort(function (a, b) { return a.low - b.low; });
+    if (tags.indexOf('cheap') < 0 && tags.indexOf('sweet') < 0 && tags.indexOf('drink') < 0) { var seen = {}, pick = []; res.forEach(function (x) { if (!seen[x.c.id] || seen[x.c.id] < 2) { seen[x.c.id] = (seen[x.c.id] || 0) + 1; pick.push(x); } }); res = pick; }
+    return { items: res.slice(0, 8), tags: tags, total: res.length, budget: budget };
+  }
+  function showSug(r, q) {
+    steppers = steppers.filter(function (d) { return !d.sug; });
+    var box = $('sug-res'); box.textContent = '';
+    if (!r.items.length) { box.appendChild(el('p', 'empty', 'ملقيناش حاجة بالوصف ده. جرّب كلمة تانية (مثلاً: بيض، طعمية، حلو) أو كلمنا واتساب.')); return; }
+    var notes = r.tags.filter(function (t) { return TAGS[t]; }).map(function (t) { return TAGS[t].label + ': ' + TAGS[t].note; });
+    if (r.budget) notes.push('في حدود ' + ar(r.budget) + ' ج للصنف.');
+    if (notes.length) box.appendChild(el('p', 'sugnote', notes.join(' ')));
+    r.items.forEach(function (x) { var row = buildItem(x.it, x.c, x.prov); steppers[steppers.length - 1].sug = true; row.classList.add('sugitem'); var cat = el('div', 'detail', x.c.title); row.insertBefore(cat, row.firstChild); box.appendChild(row); });
+    box.appendChild(el('p', 'muted', 'التصنيف حسب اسم الصنف بس. اسأل المطعم عن المكونات لو عندك حساسية أو صيام.'));
+  }
+  (function () {
+    var chips = $('sug-chips'); ['veg', 'light', 'full', 'quick', 'sweet', 'drink', 'cheap'].forEach(function (t) { var b = el('button', '', TAGS[t].label); b.type = 'button'; b.onclick = function () { $('sug-q').value = TAGS[t].label; run(t); }; chips.appendChild(b); });
+    function run(t) { if (!data) return; var q = $('sug-q').value; var r = t ? suggest(t === 'veg' ? 'صيامي' : t === 'light' ? 'خفيف' : t === 'full' ? 'شبعان' : t === 'quick' ? 'سريع' : t === 'sweet' ? 'حلو' : t === 'drink' ? 'مشروب' : 'ارخص') : suggest(q); showSug(r, q); $('sug-res').scrollIntoView({ block: 'nearest' }); }
+    $('sug-go').onclick = function () { run(); };
+    $('sug-q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); run(); } });
+  })();
+
   /* install guide */
   var ua = navigator.userAgent, isIOS = /iphone|ipad|ipod/i.test(ua), isAnd = /android/i.test(ua), inApp = /FBAN|FBAV|Instagram|WhatsApp|Line\/|; wv\)/i.test(ua);
   function showGuide() {
@@ -202,7 +274,7 @@
     data = d; hotline = d.hotline;
     $('hero-wa').href = 'https://wa.me/2' + hotline + '?text=' + encodeURIComponent('أهلاً، عايز أطلب من فول محمود رواش');
     $('hero-call').href = 'tel:' + hotline;
-    render(); refresh();
+    render(); indexMenu(); refresh();
   });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
 })();
